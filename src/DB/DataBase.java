@@ -1,7 +1,11 @@
 package DB;
 
-import java.sql.Connection;
+import java.sql.*;
+import java.util.ArrayList;
 
 public abstract class DataBase {
-    abstract Connection getConnection();
+    public abstract Connection connection();
+    public abstract void disconnect();
+    public abstract void execute(String sql, ArrayList<String> bindParams);
+    public abstract ResultSet executeResultSet(String sql, ArrayList<String> bindParams );
 }

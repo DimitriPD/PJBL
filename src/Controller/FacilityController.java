@@ -1,5 +1,6 @@
 package Controller;
 
+import java.sql.SQLException;
 import java.util.*;
 import DAO.FacilityDAO;
 import Model.FacilityModel;
@@ -9,9 +10,9 @@ import Model.FacilityAssetModel;
 
 public class FacilityController {
     
-    public static List<FacilityModel> getAll(String buildingId, String facilityTypeId) {
+    public static List<FacilityModel> getAll(String facilityTypeId) throws SQLException {
         
-        List<FacilityModel> facilities = FacilityDAO.getAll(buildingId, facilityTypeId);
+        List<FacilityModel> facilities = FacilityDAO.getAll(facilityTypeId);
         
         if (facilities.isEmpty()) {
             //vazio
@@ -27,13 +28,14 @@ public class FacilityController {
         return facilities;
     }
     
-    public static FacilityModel getById(String id, boolean getAssets) {
+    public static FacilityModel getById(String id, boolean getAssets) throws SQLException {
         
         FacilityModel facility = FacilityDAO.getById(id);
         if (facility == null) {
-            //erro
-        }
-        
+            System.out.println('a');
+            return null;     
+        }   
+        System.out.println(facility.getAssets());
         if (getAssets) {
             List<FacilityAssetModel> facilityAssets = FacilityDAO.getAllFacilityAssets(id);
             
@@ -45,8 +47,7 @@ public class FacilityController {
     }
     
     public static String create(FacilityModel facility) {
-        
-        facility.setFacilityId(UUID.randomUUID().toString());
+    
         List<FacilityAssetModel> assets = facility.getAssets();
 
         FacilityDAO.create(facility);
@@ -60,9 +61,15 @@ public class FacilityController {
         return facility.getFacilityId();
     }
 
-    public static void update(FacilityModel facilityUpdated) {
+    public static void update(FacilityModel facilityUpdated) throws SQLException {
 
         FacilityModel facility = getById(facilityUpdated.getFacilityId(), true);
+
+        if (facility == null) {
+            return;
+        }
+
+        FacilityDAO.update(facilityUpdated);
         
         List<FacilityAssetModel> updatedAssets = facilityUpdated.getAssets();
         List<FacilityAssetModel> existingAssets = facility.getAssets();

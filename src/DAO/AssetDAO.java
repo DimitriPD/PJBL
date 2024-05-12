@@ -1,23 +1,67 @@
 package DAO;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import DB.Mysql;
-import Model.AssetModel;
+import java.sql.*;
+import java.util.*;
+import Model.*;
 
 public class AssetDAO {
-		private static Connection conn = Mysql.getConnection();
+	private static Mysql MySqlDB = new Mysql();
 
-		public static List<AssetModel> getAll() throws SQLException {
-				ArrayList<AssetModel> assetList = new ArrayList<AssetModel>();
-				String sql = "select * from tbassets";
-				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery(sql);
-				while (rs.next()) {
-					AssetModel assetModel = new AssetModel((String) rs.getString("assetId"), rs.getString("assetDescription"));
-					assetList.add(assetModel);
-				}
-				return assetList;
+	public static void create(AssetModel assetModel) {
+		String sql = "insert into tbassets values (?, ?)";
+		ArrayList<String> bindParams = new ArrayList<>();
+		bindParams.add(assetModel.getAssetId());
+		bindParams.add(assetModel.getAssetDescription());
+
+		MySqlDB.connection();
+		MySqlDB.execute(sql, bindParams);
+		MySqlDB.disconnect();
+	}
+
+	public static List<AssetModel> getAll() throws SQLException {
+		String sql = "select * from tbassets";
+		ArrayList<AssetModel> assetList = new ArrayList<AssetModel>();
+		
+		MySqlDB.connection();
+		ResultSet rs = MySqlDB.executeResultSet(sql, null);
+		
+		while (rs.next()) {
+			String assetDescription = rs.getString("assetDescription");
+			String assetId = rs.getString("assetId");
+			AssetModel assetModel = new AssetModel(assetId, assetDescription);
+			assetList.add(assetModel);
 		}
+
+		MySqlDB.disconnect();
+		return assetList;
+	}
+
+	public static AssetModel getById(String id) throws SQLException {
+		String sql = "select * from tbassets where assetid = ?";
+		ArrayList<String> bindParams = new ArrayList<>();
+		bindParams.add(id);
+		AssetModel assetModel = null;
+		
+		MySqlDB.connection();
+		ResultSet rs = MySqlDB.executeResultSet(sql, bindParams);
+		
+		while (rs.next()) {
+			assetModel = new AssetModel(rs.getString("assetId"), rs.getString("assetDescription"));
+		}
+		
+		MySqlDB.disconnect();
+		return assetModel;
+	}
+
+	public static void update(AssetModel assetModel) {
+		String sql = "update tbassets set assetDescription = ? where assetid = ?";
+		ArrayList<String> bindParams = new ArrayList<>();
+		bindParams.add(assetModel.getAssetDescription());
+		bindParams.add(assetModel.getAssetId());
+
+		MySqlDB.connection();
+		MySqlDB.execute(sql, bindParams);
+		MySqlDB.disconnect();
+	}
 }

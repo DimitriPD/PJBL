@@ -1,8 +1,10 @@
 package Model;
 import java.util.List;
+import java.util.UUID;
 
 public class FacilityModel {
   private String facilityId;
+  private String facilityTypeId;
   private String facilityTypeDescription;
   private boolean isActive;
   private String facilityName;
@@ -10,22 +12,34 @@ public class FacilityModel {
   private String note;
   private List<FacilityAssetModel> assets;
 
-  public FacilityModel(String _facilityId, String _facilityTypeDescription, boolean _isActive, String _facilityName, String _capacity, String _note, List<FacilityAssetModel> _assets) {
-        this.facilityId = _facilityId;
-        this.facilityTypeDescription = _facilityTypeDescription;
-        this.isActive = _isActive;
-        this.facilityName = _facilityName;
-        this.capacity = _capacity;
-        this.note = _note;
-        this.assets = _assets;
+  public FacilityModel(String _facilityId, String _facilityTypeId, boolean _isActive, String _facilityName, String _capacity, String _note, List<FacilityAssetModel> _assets) {
+        setFacilityId(_facilityId);
+        setFacilityTypeId(_facilityTypeId);
+        setActive(_isActive);
+        setFacilityName(_facilityName);
+        setCapacity(_capacity);
+        setNote(_note);
+        setAssets(_assets);
     }
 
   public void setFacilityId(String _facilityId) {
-    this.facilityId = _facilityId;
+    if (_facilityId == null) {
+          this.facilityId = UUID.randomUUID().toString();
+        } else {
+          this.facilityId = _facilityId;
+        }
   }
 
   public String getFacilityId() {
     return this.facilityId;
+  }
+
+  public String getFacilityTypeId() {
+    return facilityTypeId;
+  }
+
+  public void setFacilityTypeId(String facilityTypeId) {
+    this.facilityTypeId = facilityTypeId;
   }
   
   public void setAssets(List<FacilityAssetModel> _facilityAssets) {
