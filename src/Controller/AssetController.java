@@ -25,7 +25,7 @@ public class AssetController {
         AssetModel assetModel = AssetDAO.getById(id);
         
         if (assetModel == null) {
-            // não encontrado
+            // não encontrado skjfh skafhk
             return null;
         }
         return assetModel;
@@ -37,7 +37,6 @@ public class AssetController {
         if (assetFromDB == null) {
             return;
         }
-
         AssetDAO.update(assetModel);
     }
 }

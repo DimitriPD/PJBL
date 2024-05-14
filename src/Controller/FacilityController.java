@@ -104,7 +104,6 @@ public class FacilityController {
         if (facilityTypes.isEmpty()) {
             //nao tem
         }
-        
         return facilityTypes;
     }
 }

@@ -1,7 +1,8 @@
+import java.awt.Button;
+import java.awt.Color;
 import java.sql.SQLException;
 import java.util.*;
 
-import Controller.AssetController;
 import Controller.FacilityController;
 import Model.*;
 
@@ -17,7 +18,14 @@ public class App {
         // }
         // System.out.println(FacilityController.getById("250677f9-3122-44bf-bde9-1b2f9f81b35c", true).getAssets());
         // FacilityController.create(new FacilityModel(null, "ceb542b3-26de-4c9c-bfd3-a57f06f6fc14", true, "Kant", null, null, null));
+        Screen screen = new Screen("Nova Tela");
+
+        Button botao = new Button();
+        botao.setSize(100, 100);
+        botao.setBackground(Color.BLACK);
+        screen.add(botao);
         FacilityController.update(new FacilityModel("250677f9-3122-44bf-bde9-1b2f9f81b35c", "ceb542b3-26de-4c9c-bfd3-a57f06f6fc14", true, "Kant", null, null, new ArrayList<FacilityAssetModel>()));
+        System.out.println("TESTE");
         // System.out.println(FacilityController.getById("250677f9-3122-44bf-bde9-1b2f9f81b35c", false).getFacilityId());
         // System.out.println(AssetController.getById("9f03a1a6-992c-46a1-8c8e-eafee56dab62").getAssetId());
     }

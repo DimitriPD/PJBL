@@ -3,11 +3,9 @@ package DAO;
 import DB.Mysql;
 import java.sql.*;
 import java.util.*;
-
-import javax.print.DocFlavor.STRING;
-
-import Model.*;
-
+import Model.FacilityAssetModel;
+import Model.FacilityModel;
+import Model.FacilityTypeModel;
 
 public class FacilityDAO {
     private static Mysql MySqlDB = new Mysql();
@@ -16,12 +14,12 @@ public class FacilityDAO {
     public static List<FacilityModel> getAll(String facilityTypeId) throws SQLException {
         String sql = "SELECT f.*, t.facilityTypeDescription " + //
                      "FROM tbFacilities f " + //
-                     "INNER JOIN tbFacilityTypes t ON t.facilityTypeId = f.facilityTypeId";
+                     "INNER JOIN tbFacilityTypes t ON t.facilityTypeId = f.facilityTypeId;";
 
         ArrayList<String> bindParams = null;
 
         if (facilityTypeId != null) {
-            sql += "  WHERE f.facilityTypeId = ?";
+            sql += "  WHERE f.facilityTypeId = ?;";
             bindParams = new ArrayList<>();
             bindParams.add(facilityTypeId);
         }

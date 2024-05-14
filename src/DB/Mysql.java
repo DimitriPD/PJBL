@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Mysql extends DataBase {
     private static String url = "jdbc:mysql://localhost:3306/pucespacos";
     private static String user = "root";
-    private static String password = "PUC@1234";
+    private static String password = "";
     private Connection connection;
 
     public Mysql() {

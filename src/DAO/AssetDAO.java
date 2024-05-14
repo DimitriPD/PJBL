@@ -3,13 +3,13 @@ package DAO;
 import DB.Mysql;
 import java.sql.*;
 import java.util.*;
-import Model.*;
+import Model.AssetModel;
 
 public class AssetDAO {
 	private static Mysql MySqlDB = new Mysql();
 
 	public static void create(AssetModel assetModel) {
-		String sql = "insert into tbassets values (?, ?)";
+		String sql = "insert into tbassets values (?, ?);";
 		ArrayList<String> bindParams = new ArrayList<>();
 		bindParams.add(assetModel.getAssetId());
 		bindParams.add(assetModel.getAssetDescription());
@@ -20,7 +20,7 @@ public class AssetDAO {
 	}
 
 	public static List<AssetModel> getAll() throws SQLException {
-		String sql = "select * from tbassets";
+		String sql = "select * from tbassets;";
 		ArrayList<AssetModel> assetList = new ArrayList<AssetModel>();
 		
 		MySqlDB.connection();
@@ -38,7 +38,7 @@ public class AssetDAO {
 	}
 
 	public static AssetModel getById(String id) throws SQLException {
-		String sql = "select * from tbassets where assetid = ?";
+		String sql = "select * from tbassets where assetid = ?;";
 		ArrayList<String> bindParams = new ArrayList<>();
 		bindParams.add(id);
 		AssetModel assetModel = null;
@@ -55,7 +55,7 @@ public class AssetDAO {
 	}
 
 	public static void update(AssetModel assetModel) {
-		String sql = "update tbassets set assetDescription = ? where assetid = ?";
+		String sql = "update tbassets set assetDescription = ? where assetid = ?;";
 		ArrayList<String> bindParams = new ArrayList<>();
 		bindParams.add(assetModel.getAssetDescription());
 		bindParams.add(assetModel.getAssetId());

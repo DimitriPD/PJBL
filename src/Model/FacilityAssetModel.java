@@ -1,7 +1,5 @@
 package Model;
 
-import java.util.UUID;
-
 public class FacilityAssetModel extends AssetModel {
     private String facilityId;
     private int quantity;
