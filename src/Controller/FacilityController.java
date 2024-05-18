@@ -98,7 +98,7 @@ public class FacilityController {
         throw new UnsupportedOperationException("Unimplemented method 'getById'");
     }
 
-    public static List<FacilityTypeModel> getAllTypes() {
+    public static List<FacilityTypeModel> getAllTypes() throws SQLException {
         List<FacilityTypeModel> facilityTypes = FacilityDAO.getAllTypes();
         
         if (facilityTypes.isEmpty()) {

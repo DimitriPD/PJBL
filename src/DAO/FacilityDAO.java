@@ -16,7 +16,7 @@ public class FacilityDAO {
                      "FROM tbFacilities f " + //
                      "INNER JOIN tbFacilityTypes t ON t.facilityTypeId = f.facilityTypeId;";
 
-        ArrayList<String> bindParams = null;
+        ArrayList<Object> bindParams = null;
 
 		ArrayList<FacilityModel> facilityList = new ArrayList<FacilityModel>();
 		
@@ -29,9 +29,9 @@ public class FacilityDAO {
             String facilityTypeDescription  = rs.getString("facilityTypeDescription");
             boolean isActive  = rs.getBoolean("isActive");
             String facilityName  = rs.getString("facilityName");
-            String capacity  = rs.getString("capacity");
+            Integer capacity  = rs.getInt("capacity");
             String note  = rs.getString("note");
-            FacilityModel facility = new FacilityModel(facilityId, facilityTypeIdFromDB, isActive, facilityName, capacity, note, null);
+            FacilityModel facility = new FacilityModel(facilityId, facilityTypeIdFromDB, isActive, facilityName, capacity, note);
             facility.setFacilityTypeDescription(facilityTypeDescription);
 			facilityList.add(facility);
 		}
@@ -45,7 +45,7 @@ public class FacilityDAO {
                      "FROM tbFacilities f " + //
                      "INNER JOIN tbFacilityTypes t ON t.facilityTypeId = f.facilityTypeId " +
                      "WHERE facilityId = ?";
-		ArrayList<String> bindParams = new ArrayList<>();
+		ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(id);
 		FacilityModel facility= null;
 		
@@ -58,9 +58,9 @@ public class FacilityDAO {
             String facilityTypeDescription  = rs.getString("facilityTypeDescription");
             boolean isActive  = rs.getBoolean("isActive");
             String facilityName  = rs.getString("facilityName");
-            String capacity  = rs.getString("capacity");
+            Integer capacity  = rs.getInt("capacity");
             String note  = rs.getString("note");
-            facility = new FacilityModel(facilityId, facilityTypeId, isActive, facilityName, capacity, note, null);
+            facility = new FacilityModel(facilityId, facilityTypeId, isActive, facilityName, capacity, note);
             facility.setFacilityTypeDescription(facilityTypeDescription);
 		}
 		
@@ -73,7 +73,7 @@ public class FacilityDAO {
                      "FROM tbFacilityAssets fa " +
                      "INNER JOIN tbassets a ON a.assetId = fa.assetId " +
                      "WHERE fa.facilityId = ?;";
-        ArrayList<String> bindParams = new ArrayList<>();
+        ArrayList<Object> bindParams = new ArrayList<>();
         bindParams.add(facilityId);
         ArrayList<FacilityAssetModel> facilityAssetList = new ArrayList<FacilityAssetModel>();
 
@@ -101,7 +101,7 @@ public class FacilityDAO {
                         "capacity, " + //
                         "note) " + //
                      "values (?, ?, ?, ?, ?, ?);";
-		ArrayList<String> bindParams = new ArrayList<>();
+		ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(facility.getFacilityId());
 		bindParams.add(facility.getFacilityTypeId());
 		bindParams.add(facility.isActive() ? "1" : "0");
@@ -120,10 +120,10 @@ public class FacilityDAO {
                         "assetId,  " + //
                         "quantity,  " + //
                      " VALUES (?, ?, ?);";
-        ArrayList<String> bindParams = new ArrayList<>();
+        ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(asset.getFacilityId());
 		bindParams.add(asset.getAssetId());
-		bindParams.add(String.valueOf(asset.getQuantity()));
+		bindParams.add(asset.getQuantity());
 
         MySqlDB.connection();
 		MySqlDB.execute(sql, bindParams);
@@ -140,9 +140,9 @@ public class FacilityDAO {
                       "note = ? " +
                      "WHERE facilityId = ?;";
     
-        ArrayList<String> bindParams = new ArrayList<>();
+        ArrayList<Object> bindParams = new ArrayList<>();
         bindParams.add(facility.getFacilityTypeId());
-        bindParams.add(facility.isActive() ? "0" : "1");
+        bindParams.add(facility.isActive());
         bindParams.add(facility.getFacilityName());
         bindParams.add(facility.getCapacity());
         bindParams.add(facility.getNote());
@@ -162,7 +162,24 @@ public class FacilityDAO {
         throw new UnsupportedOperationException("Unimplemented method 'deleteFacilityAsset'");
     }
 
-    public static List<FacilityTypeModel> getAllTypes() {
-        throw new UnsupportedOperationException("Unimplemented method 'getAllTypes'");
+    public static List<FacilityTypeModel> getAllTypes() throws SQLException {
+        String sql = "SELECT * FROM tbFacilityTypes order by facilityTypeDescription;";
+
+        ArrayList<Object> bindParams = null;
+
+		ArrayList<FacilityTypeModel> facilityTypesList = new ArrayList<FacilityTypeModel>();
+		
+		MySqlDB.connection();
+		ResultSet rs = MySqlDB.executeResultSet(sql, bindParams);
+
+        while (rs.next()) {
+            String facilityTypeId = rs.getString("facilityTypeId");
+            String facilityTypeDescription  = rs.getString("facilityTypeDescription");
+            FacilityTypeModel type = new FacilityTypeModel(facilityTypeId, facilityTypeDescription);
+			facilityTypesList.add(type);
+		}
+
+		MySqlDB.disconnect();
+		return facilityTypesList;
     }
 }

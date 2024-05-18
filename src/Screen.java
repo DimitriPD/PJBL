@@ -1,22 +1,28 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.text.NumberFormatter;
 
 import Controller.FacilityController;
 import Model.FacilityModel;
+import Model.FacilityTypeModel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Screen extends JFrame {
     private List<FacilityModel> facilityList = new ArrayList<>();
     private JTable facilityTable;
     private DefaultTableModel facilityTableModel;
     private FacilityModel selectedFacility;
+    private JComboBox<String> typeComboBox;
+    private List<FacilityTypeModel> types;
 
     public Screen() {
         setTitle("PUC Espaços");
@@ -25,7 +31,7 @@ public class Screen extends JFrame {
         setLocationRelativeTo(null);
 
         // Setup the facility table
-        String[] facilityColumnNames = {"Tipo", "Está ativo?", "Nome", "Capacidade", "Observações"};
+        String[] facilityColumnNames = {"Nome", "Capacidade", "Observações", "Tipo", "Está ativo?"};
         facilityTableModel = new DefaultTableModel(facilityColumnNames, 0);
         facilityTable = new JTable(facilityTableModel) {
             @Override
@@ -47,6 +53,10 @@ public class Screen extends JFrame {
         header.setFont(new Font("Arial", Font.BOLD, 16));
         header.setBackground(Color.BLUE);
         header.setForeground(Color.WHITE);
+
+        // Combobox para o campo "Tipo"
+        typeComboBox = new JComboBox<>();
+        typeComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Buttons
         JButton addButton = new JButton("Criar Espaço");
@@ -89,18 +99,56 @@ public class Screen extends JFrame {
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    private NumberFormatter createNumberFormatter() {
+        NumberFormat format = NumberFormat.getIntegerInstance();
+        format.setGroupingUsed(false);
+        NumberFormatter formatter = new NumberFormatter(format);
+        formatter.setValueClass(Integer.class);
+        formatter.setMinimum(0);
+        formatter.setMaximum(Integer.MAX_VALUE);
+        return formatter;
+    }
+
     private FacilityModel showFacilityDialog(FacilityModel facility) {
-        JTextField idField = new JTextField(facility != null ? facility.getFacilityId() : "");
-        JTextField typeIdField = new JTextField(facility != null ? facility.getFacilityTypeId() : "");
-        JTextField typeDescriptionField = new JTextField(facility != null ? facility.getFacilityTypeDescription() : "");
-        JCheckBox activeCheckBox = new JCheckBox("Ativo?", facility != null && facility.isActive());
+        
+        JTextField idField = new JTextField(facility != null ? facility.getFacilityId() : UUID.randomUUID().toString());
         JTextField nameField = new JTextField(facility != null ? facility.getFacilityName() : "");
-        JTextField capacityField = new JTextField(facility != null ? facility.getCapacity() : "");
+        JCheckBox activeCheckBox = new JCheckBox("Ativo?", facility != null && facility.isActive());
+        
+        JFormattedTextField capacityField = new JFormattedTextField(createNumberFormatter());
+        if (facility != null) {
+            capacityField.setValue(facility.getCapacity());
+        }
+        
         JTextField noteField = new JTextField(facility != null ? facility.getNote() : "");
+
+        // Preencher combobox com os tipos de espaços
+        typeComboBox.removeAllItems();
+        try {
+            types = FacilityController.getAllTypes();
+            for (FacilityTypeModel type : types) {
+                typeComboBox.addItem(type.getFacilityTypeDescription());
+            }
+
+            // Preenche com o valor do ativo caso tenha
+            if (facility != null) {
+                for (int i = 0; i < typeComboBox.getItemCount(); i++) {
+                    FacilityTypeModel type = types.get(i);
+                    if (type.getFacilityTypeId().equals(facility.getFacilityTypeId())) {
+                        typeComboBox.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
+            
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         JPanel panel = new JPanel(new GridLayout(0, 1));
         panel.add(new JLabel("Tipo:"));
-        panel.add(typeDescriptionField);
+        panel.add(typeComboBox);
         panel.add(activeCheckBox);
         panel.add(new JLabel("Nome:"));
         panel.add(nameField);
@@ -111,25 +159,40 @@ public class Screen extends JFrame {
 
         int result = JOptionPane.showConfirmDialog(null, panel, "Espaço", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            return createOrUpdateFacility(facility, idField.getText().trim(), typeIdField.getText().trim(), typeDescriptionField.getText().trim(),
-                    activeCheckBox.isSelected(), nameField.getText().trim(), capacityField.getText().trim(), noteField.getText().trim());
+
+            // Obter o facilityTypeId baseado na seleção do usuário
+            String selectedDescription = (String) typeComboBox.getSelectedItem();
+            String selectedTypeId = "";
+            for (FacilityTypeModel type : types) {
+                if (type.getFacilityTypeDescription().equals(selectedDescription)) {
+                    selectedTypeId = type.getFacilityTypeId();
+                    break;
+                }
+            }
+
+            return createOrUpdateFacility(
+                facility, 
+                idField.getText().trim(), 
+                selectedTypeId, 
+                activeCheckBox.isSelected(), 
+                nameField.getText().trim(), 
+                Integer.parseInt(capacityField.getText()), 
+                noteField.getText().trim()
+            );
         }
         return null;
     }
 
-    private FacilityModel createOrUpdateFacility(FacilityModel facility, String facilityId, String facilityTypeId, String facilityTypeDescription,
-                                                 boolean isActive, String facilityName, String capacity, String note) {
+    private FacilityModel createOrUpdateFacility(FacilityModel facility, String facilityId, String facilityTypeId,
+                                                 boolean isActive, String facilityName, Integer capacity, String note) {
         if (facility == null) {
-            // Creating a new facility
-            FacilityModel newFacility = new FacilityModel(facilityId, facilityTypeId, isActive, facilityName, capacity, note, new ArrayList<>());
+            FacilityModel newFacility = new FacilityModel(facilityId, facilityTypeId, isActive, facilityName, capacity, note);
             FacilityController.create(newFacility);
             return newFacility;
-
         } else {
-            // Updating an existing facility
+            // Atualizando espaço existente
             facility.setFacilityId(facilityId);
             facility.setFacilityTypeId(facilityTypeId);
-            facility.setFacilityTypeDescription(facilityTypeDescription);
             facility.setActive(isActive);
             facility.setFacilityName(facilityName);
             facility.setCapacity(capacity);
@@ -149,11 +212,11 @@ public class Screen extends JFrame {
         facilityTableModel.setRowCount(0);
         for (FacilityModel facility : facilityList) {
             facilityTableModel.addRow(new Object[]{
-                    facility.getFacilityTypeDescription(),
-                    facility.isActive(),
                     facility.getFacilityName(),
                     facility.getCapacity(),
-                    facility.getNote()
+                    facility.getNote(),
+                    facility.getFacilityTypeDescription(),
+                    facility.isActive()
             });
         }
     }
@@ -162,20 +225,19 @@ public class Screen extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Screen facilityManagementApp = new Screen();
+                Screen screen = new Screen();
 
                 try {
-                    facilityManagementApp.facilityList = FacilityController.getAll();
+                    screen.facilityList = FacilityController.getAll();
                 } catch (SQLException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
-                // Atualizando a tabela de instalações após adicionar os dados iniciais
-                facilityManagementApp.updateFacilityTable();
+                // Atualizando a tabela de espaços após adicionar os dados iniciais
+                screen.updateFacilityTable();
 
-                // Exibindo o aplicativo
-                facilityManagementApp.setVisible(true);
+                // Exibindo a tela
+                screen.setVisible(true);
             }
         });
     }

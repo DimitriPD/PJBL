@@ -8,18 +8,17 @@ public class FacilityModel {
   private String facilityTypeDescription;
   private boolean isActive;
   private String facilityName;
-  private String capacity;
+  private Integer capacity;
   private String note;
   private List<FacilityAssetModel> assets;
 
-  public FacilityModel(String _facilityId, String _facilityTypeId, boolean _isActive, String _facilityName, String _capacity, String _note, List<FacilityAssetModel> _assets) {
+  public FacilityModel(String _facilityId, String _facilityTypeId, boolean _isActive, String _facilityName, Integer _capacity, String _note) {
         setFacilityId(_facilityId);
         setFacilityTypeId(_facilityTypeId);
         setActive(_isActive);
         setFacilityName(_facilityName);
         setCapacity(_capacity);
         setNote(_note);
-        setAssets(_assets);
     }
 
   public void setFacilityId(String _facilityId) {
@@ -74,11 +73,11 @@ public class FacilityModel {
       this.facilityName = _facilityName;
   }
 
-  public String getCapacity() {
+  public Integer getCapacity() {
       return capacity;
   }
 
-  public void setCapacity(String _capacity) {
+  public void setCapacity(Integer _capacity) {
       this.capacity = _capacity;
   }
 

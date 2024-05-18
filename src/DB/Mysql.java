@@ -39,13 +39,13 @@ public class Mysql extends DataBase {
     }
 
     @Override
-    public void execute(String sql, ArrayList<String> bindParams) {
+    public void execute(String sql, ArrayList<Object> bindParams) {
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             System.out.println(ps);
             if (bindParams != null) {
                 for (int i = 0; i < bindParams.size(); i++) {
-                    ps.setString(i + 1, bindParams.get(i));
+                    ps.setObject(i + 1, bindParams.get(i));
                 }
             }
 
@@ -56,12 +56,12 @@ public class Mysql extends DataBase {
     }
 
     @Override
-    public ResultSet executeResultSet(String sql, ArrayList<String> bindParams) {
+    public ResultSet executeResultSet(String sql, ArrayList<Object> bindParams) {
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             if (bindParams != null) {
                 for (int i = 0; i < bindParams.size(); i++) {
-                    ps.setString(i + 1, bindParams.get(i));
+                    ps.setObject(i + 1, bindParams.get(i));
                 }
             }
 
