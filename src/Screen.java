@@ -51,7 +51,7 @@ public class Screen extends JFrame {
 
         JTableHeader header = facilityTable.getTableHeader();
         header.setFont(new Font("Arial", Font.BOLD, 16));
-        header.setBackground(Color.BLUE);
+        header.setBackground(Color.decode("#610127"));
         header.setForeground(Color.WHITE);
 
         // Combobox para o campo "Tipo"
@@ -60,7 +60,11 @@ public class Screen extends JFrame {
 
         // Buttons
         JButton addButton = new JButton("Criar Espaço");
+        addButton.setBackground(Color.decode("#31458E"));
+        addButton.setForeground(Color.WHITE);
         JButton editButton = new JButton("Editar Espaço");
+        editButton.setBackground(Color.decode("#31458E"));
+        editButton.setForeground(Color.WHITE);
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -91,10 +95,12 @@ public class Screen extends JFrame {
         });
 
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.WHITE);
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
 
         getContentPane().setLayout(new BorderLayout());
+        getContentPane().setBackground(Color.WHITE);
         getContentPane().add(facilityScrollPane, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
     }
@@ -147,6 +153,7 @@ public class Screen extends JFrame {
         }
 
         JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.setBackground(Color.WHITE);
         panel.add(new JLabel("Tipo:"));
         panel.add(typeComboBox);
         panel.add(activeCheckBox);
