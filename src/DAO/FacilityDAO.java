@@ -11,18 +11,12 @@ public class FacilityDAO {
     private static Mysql MySqlDB = new Mysql();
 
     // READ
-    public static List<FacilityModel> getAll(String facilityTypeId) throws SQLException {
+    public static List<FacilityModel> getAll() throws SQLException {
         String sql = "SELECT f.*, t.facilityTypeDescription " + //
                      "FROM tbFacilities f " + //
                      "INNER JOIN tbFacilityTypes t ON t.facilityTypeId = f.facilityTypeId;";
 
         ArrayList<String> bindParams = null;
-
-        if (facilityTypeId != null) {
-            sql += "  WHERE f.facilityTypeId = ?;";
-            bindParams = new ArrayList<>();
-            bindParams.add(facilityTypeId);
-        }
 
 		ArrayList<FacilityModel> facilityList = new ArrayList<FacilityModel>();
 		

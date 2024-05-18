@@ -10,9 +10,9 @@ import Model.FacilityAssetModel;
 
 public class FacilityController {
     
-    public static List<FacilityModel> getAll(String facilityTypeId) throws SQLException {
+    public static List<FacilityModel> getAll() throws SQLException {
         
-        List<FacilityModel> facilities = FacilityDAO.getAll(facilityTypeId);
+        List<FacilityModel> facilities = FacilityDAO.getAll();
         
         if (facilities.isEmpty()) {
             //vazio
