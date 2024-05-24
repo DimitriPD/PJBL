@@ -263,7 +263,6 @@ public class FacilitiesScreen extends JFrame {
         }
     }
 
-
     private FacilityModel updateTheHoleFacility(FacilityModel facility) {
         try {
             FacilityController.update(facility);

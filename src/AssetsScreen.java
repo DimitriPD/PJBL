@@ -73,7 +73,11 @@ public class AssetsScreen extends JFrame {
                     FacilityAssetModel selectedAsset = selectedFacility.getAssets().get(selectedRow);
                     // Abrir diálogo de edição de ativo
                     editAssetDialog(selectedAsset);
-                } else {
+                }            
+                else if (assetTable.getRowCount() == 0) {
+                    JOptionPane.showMessageDialog(null, "Não há ativos para editar.");
+                }
+                else {
                     JOptionPane.showMessageDialog(null, "Selecione um ativo para editar.");
                 }
             }
@@ -82,7 +86,19 @@ public class AssetsScreen extends JFrame {
         deleteAssetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Lógica para excluir um ativo
+                int selectedRow = assetTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    // Obter o ativo selecionado
+                    FacilityAssetModel selectedAsset = selectedFacility.getAssets().get(selectedRow);
+                    // Abrir diálogo de edição de ativo
+                    deleteAssetDialog(selectedAsset);
+                } 
+                else if (assetTable.getRowCount() == 0) {
+                    JOptionPane.showMessageDialog(null, "Não há ativos para excluir.");
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Selecione um ativo para excluir.");
+                }
             }
         });
 
@@ -144,6 +160,20 @@ public class AssetsScreen extends JFrame {
                 // Se o usuário cancelar, sair do loop
                 break;
             }
+        }
+    }
+
+    private void deleteAssetDialog(FacilityAssetModel asset) {
+
+        int result = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir este ativo do espaço?", "Editar Ativo", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            for (FacilityAssetModel facilityAsset : selectedFacility.getAssets()) {
+                if (asset.getAssetId() == facilityAsset.getAssetId()) {
+                    selectedFacility.getAssets().remove(facilityAsset);
+                    break;
+                }
+            }
+            updateAssetTable();
         }
     }
 }
