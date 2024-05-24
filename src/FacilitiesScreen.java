@@ -1,10 +1,8 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.text.NumberFormatter;
 
 import Controller.FacilityController;
-import Model.FacilityAssetModel;
 import Model.FacilityModel;
 import Model.FacilityTypeModel;
 
@@ -14,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -101,7 +98,6 @@ public class FacilitiesScreen extends JFrame {
             }
         });
 
-
         openFacilitiesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -141,27 +137,12 @@ public class FacilitiesScreen extends JFrame {
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private NumberFormatter createNumberFormatter() {
-        NumberFormat format = NumberFormat.getIntegerInstance();
-        format.setGroupingUsed(false);
-        NumberFormatter formatter = new NumberFormatter(format);
-        formatter.setValueClass(Integer.class);
-        formatter.setMinimum(0);
-        formatter.setMaximum(Integer.MAX_VALUE);
-        return formatter;
-    }
-
     private FacilityModel showFacilityDialog(FacilityModel facility) {
         
         JTextField idField = new JTextField(facility != null ? facility.getFacilityId() : UUID.randomUUID().toString());
         JTextField nameField = new JTextField(facility != null ? facility.getFacilityName() : "");
         JCheckBox activeCheckBox = new JCheckBox("Ativo?", facility != null && facility.isActive());
-        
-        JFormattedTextField capacityField = new JFormattedTextField(createNumberFormatter());
-        if (facility != null) {
-            capacityField.setValue(facility.getCapacity());
-        }
-        
+        JTextField capacityField = new JTextField(facility != null ? String.valueOf(facility.getCapacity()) : "");
         JTextField noteField = new JTextField(facility != null ? facility.getNote() : "");
 
         // Preencher combobox com os tipos de espaços
@@ -184,7 +165,6 @@ public class FacilitiesScreen extends JFrame {
             }
             
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -200,51 +180,83 @@ public class FacilitiesScreen extends JFrame {
         panel.add(new JLabel("Observações:"));
         panel.add(noteField);
 
-        int result = JOptionPane.showConfirmDialog(null, panel, "Espaço", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (result == JOptionPane.OK_OPTION) {
+        boolean isValidInput = false;
+        while (!isValidInput) {
+            String title = (facility != null) ? "Editar Espaço" : "Criar Espaço";
+           int result = JOptionPane.showConfirmDialog(null, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+           if (result == JOptionPane.OK_OPTION) {
+               try {
+                    int capacity = 0;
+                    isValidInput = true;
+                    if (nameField.getText().trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Informe o nome do espaço.");
+                        isValidInput = false;
+                    }
+                    else if (!capacityField.getText().trim().isEmpty()) {
+   
+                        capacity = Integer.parseInt(capacityField.getText());
+                        if (capacity < 1 || capacity > 2000) {
+                            JOptionPane.showMessageDialog(null, "A capacidade quando informada, deve ser um número positivo entre 1 e 2000.");
+                            isValidInput = false;
+                        }
+                    } 
+                    if (isValidInput) {                        
+                        // Obter o facilityTypeId baseado na seleção do usuário
+                        String selectedDescription = (String) typeComboBox.getSelectedItem();
+                        String selectedTypeId = "";
+                        for (FacilityTypeModel type : types) {
+                            if (type.getFacilityTypeDescription().equals(selectedDescription)) {
+                                selectedTypeId = type.getFacilityTypeId();
+                                break;
+                            }
+                        }
+                        isValidInput = true; // Sair do loop se a entrada for válida
 
-            // Obter o facilityTypeId baseado na seleção do usuário
-            String selectedDescription = (String) typeComboBox.getSelectedItem();
-            String selectedTypeId = "";
-            for (FacilityTypeModel type : types) {
-                if (type.getFacilityTypeDescription().equals(selectedDescription)) {
-                    selectedTypeId = type.getFacilityTypeId();
-                    break;
+                        return createOrUpdateFacility(
+                            facility, 
+                            idField.getText().trim(), 
+                            selectedTypeId, 
+                            selectedDescription, 
+                            activeCheckBox.isSelected(),
+                            nameField.getText().trim(), 
+                            capacity, 
+                            noteField.getText().trim()
+                        );
+                   }
+               } catch (NumberFormatException ex) {
+                   JOptionPane.showMessageDialog(null, "A capacidade deve ser um número válido.");
+                   isValidInput = false;
                 }
-            }
-
-            return createOrUpdateFacility(
-                facility, 
-                idField.getText().trim(), 
-                selectedTypeId, 
-                activeCheckBox.isSelected(), 
-                nameField.getText().trim(), 
-                Integer.parseInt(capacityField.getText()), 
-                noteField.getText().trim()
-            );
-        }
+           } else {
+               // Se o usuário cancelar, sair do loop
+               break;
+           }
+       }
         return null;
     }
 
-    private FacilityModel createOrUpdateFacility(FacilityModel facility, String facilityId, String facilityTypeId,
-                                                 boolean isActive, String facilityName, Integer capacity, String note) {
+    private FacilityModel createOrUpdateFacility(FacilityModel facility, String facilityId, String facilityTypeId, String               facilityTypeDescription,boolean isActive, String facilityName, Integer capacity, String note) {
+        
         if (facility == null) {
             FacilityModel newFacility = new FacilityModel(facilityId, facilityTypeId, isActive, facilityName, capacity, note);
+            newFacility.setFacilityTypeDescription(facilityTypeDescription);
             FacilityController.create(newFacility);
             return newFacility;
         } else {
             // Atualizando espaço existente
             facility.setFacilityId(facilityId);
             facility.setFacilityTypeId(facilityTypeId);
+            facility.setFacilityTypeDescription(facilityTypeDescription);
             facility.setActive(isActive);
             facility.setFacilityName(facilityName);
-            facility.setCapacity(capacity);
+            if (capacity != 0) {
+                facility.setCapacity(capacity);
+            }
             facility.setNote(note);
 
             try {
                 FacilityController.update(facility);
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             return facility;
@@ -266,7 +278,7 @@ public class FacilitiesScreen extends JFrame {
         for (FacilityModel facility : facilityList) {
             facilityTableModel.addRow(new Object[]{
                     facility.getFacilityName(),
-                    facility.getCapacity(),
+                    (facility.getCapacity() != 0) ? facility.getCapacity() : "",
                     facility.getNote(),
                     facility.getFacilityTypeDescription(),
                     facility.isActive()

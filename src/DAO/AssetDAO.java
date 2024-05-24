@@ -57,7 +57,7 @@ public class AssetDAO {
 
 	public static void update(AssetModel assetModel) {
 		String sql = "update tbassets set assetDescription = ? where assetid = ?;";
-		ArrayList<String> bindParams = new ArrayList<>();
+		ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(assetModel.getAssetDescription());
 		bindParams.add(assetModel.getAssetId());
 
