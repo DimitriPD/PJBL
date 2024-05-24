@@ -42,7 +42,6 @@ public class Mysql extends DataBase {
     public void execute(String sql, ArrayList<Object> bindParams) {
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
-            System.out.println(ps);
             if (bindParams != null) {
                 for (int i = 0; i < bindParams.size(); i++) {
                     ps.setObject(i + 1, bindParams.get(i));

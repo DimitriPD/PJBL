@@ -1,16 +1,17 @@
 package DAO;
 
+import DB.DataBase;
 import DB.Mysql;
 import java.sql.*;
 import java.util.*;
 import Model.AssetModel;
 
 public class AssetDAO {
-	private static Mysql MySqlDB = new Mysql();
+	private static DataBase MySqlDB = new Mysql();
 
 	public static void create(AssetModel assetModel) {
 		String sql = "insert into tbassets values (?, ?);";
-		ArrayList<String> bindParams = new ArrayList<>();
+		ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(assetModel.getAssetId());
 		bindParams.add(assetModel.getAssetDescription());
 
@@ -39,7 +40,7 @@ public class AssetDAO {
 
 	public static AssetModel getById(String id) throws SQLException {
 		String sql = "select * from tbassets where assetid = ?;";
-		ArrayList<String> bindParams = new ArrayList<>();
+		ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(id);
 		AssetModel assetModel = null;
 		

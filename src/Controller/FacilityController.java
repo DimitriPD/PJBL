@@ -81,7 +81,7 @@ public class FacilityController {
                     .orElse(null);
             
             if (existingAsset != null) {
-                FacilityDAO.updateFacilityAsset(existingAsset);
+                FacilityDAO.updateFacilityAsset(asset);
             } else {
                 FacilityDAO.createFacilityAsset(asset);
             }
@@ -92,10 +92,6 @@ public class FacilityController {
                 FacilityDAO.deleteFacilityAsset(originalAsset.getFacilityId(), originalAsset.getAssetId());
             }
         }
-    }
-
-    public static void updateStatus(String id, boolean status) {
-        throw new UnsupportedOperationException("Unimplemented method 'getById'");
     }
 
     public static List<FacilityTypeModel> getAllTypes() throws SQLException {

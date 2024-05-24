@@ -153,13 +153,33 @@ public class FacilityDAO {
 		MySqlDB.disconnect();
       }
 
-    public static void updateFacilityAsset(FacilityAssetModel asset) {
-        throw new UnsupportedOperationException("Unimplemented method 'updateFacilityAsset'");
+    public static void updateFacilityAsset(FacilityAssetModel facilityAsset) {
+        String sql = "UPDATE tbFacilityAssets SET " +
+                     "quantity = ? " +
+                     "WHERE facilityId = ? AND assetId = ?";
+
+        ArrayList<Object> bindParams = new ArrayList<>();
+        bindParams.add(facilityAsset.getQuantity());
+        bindParams.add(facilityAsset.getFacilityId());
+        bindParams.add(facilityAsset.getAssetId());
+    
+        MySqlDB.connection();
+        MySqlDB.execute(sql, bindParams);
+        MySqlDB.disconnect();
     }
 
     // DELETE
     public static void deleteFacilityAsset(String facilityId, String assetId) {
-        throw new UnsupportedOperationException("Unimplemented method 'deleteFacilityAsset'");
+        String sql = "DELETE FROM tbFacilityAssets " +
+                     "WHERE facilityId = ? AND assetId = ?";
+
+        ArrayList<Object> bindParams = new ArrayList<>();
+        bindParams.add(facilityId);
+        bindParams.add(assetId);
+    
+        MySqlDB.connection();
+        MySqlDB.execute(sql, bindParams);
+        MySqlDB.disconnect();
     }
 
     public static List<FacilityTypeModel> getAllTypes() throws SQLException {

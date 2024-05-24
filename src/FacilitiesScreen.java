@@ -4,19 +4,22 @@ import javax.swing.table.JTableHeader;
 import javax.swing.text.NumberFormatter;
 
 import Controller.FacilityController;
+import Model.FacilityAssetModel;
 import Model.FacilityModel;
 import Model.FacilityTypeModel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Screen extends JFrame {
+public class FacilitiesScreen extends JFrame {
     private List<FacilityModel> facilityList = new ArrayList<>();
     private JTable facilityTable;
     private DefaultTableModel facilityTableModel;
@@ -24,13 +27,13 @@ public class Screen extends JFrame {
     private JComboBox<String> typeComboBox;
     private List<FacilityTypeModel> types;
 
-    public Screen() {
+    public FacilitiesScreen() {
         setTitle("PUC Espaços");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Setup the facility table
+        // Cria tabela de Espaços
         String[] facilityColumnNames = {"Nome", "Capacidade", "Observações", "Tipo", "Está ativo?"};
         facilityTableModel = new DefaultTableModel(facilityColumnNames, 0);
         facilityTable = new JTable(facilityTableModel) {
@@ -58,13 +61,17 @@ public class Screen extends JFrame {
         typeComboBox = new JComboBox<>();
         typeComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        // Buttons
+        // Botões
         JButton addButton = new JButton("Criar Espaço");
         addButton.setBackground(Color.decode("#31458E"));
         addButton.setForeground(Color.WHITE);
         JButton editButton = new JButton("Editar Espaço");
         editButton.setBackground(Color.decode("#31458E"));
         editButton.setForeground(Color.WHITE);
+        JButton openFacilitiesButton = new JButton("Gerenciar Ativos de Espaço");
+        openFacilitiesButton.setBackground(Color.decode("#31458E"));
+        openFacilitiesButton.setForeground(Color.WHITE);
+
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -94,10 +101,39 @@ public class Screen extends JFrame {
             }
         });
 
+
+        openFacilitiesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = facilityTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    selectedFacility = facilityList.get(selectedRow);
+                    
+                    // Desabilitando a tela anterior
+                    setEnabled(false);
+                    
+                    AssetsScreen assetsScreen = new AssetsScreen(selectedFacility);
+                    assetsScreen.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            // Habilitando a tela anterior quando a nova tela for fechada
+                            setEnabled(true);
+                            updateTheHoleFacility(selectedFacility);
+                        }
+                    });
+                    assetsScreen.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Selecione um espaço para gerenciar ativos.");
+                }
+            }
+        });
+        
+
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
+        buttonPanel.add(openFacilitiesButton);
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().setBackground(Color.WHITE);
@@ -215,6 +251,16 @@ public class Screen extends JFrame {
         }
     }
 
+
+    private FacilityModel updateTheHoleFacility(FacilityModel facility) {
+        try {
+            FacilityController.update(facility);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return facility;
+    }
+
     private void updateFacilityTable() {
         facilityTableModel.setRowCount(0);
         for (FacilityModel facility : facilityList) {
@@ -232,7 +278,7 @@ public class Screen extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Screen screen = new Screen();
+                FacilitiesScreen screen = new FacilitiesScreen();
 
                 try {
                     screen.facilityList = FacilityController.getAll();
