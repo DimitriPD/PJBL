@@ -57,6 +57,10 @@ public class FacilityModel {
       this.facilityTypeDescription = _facilityTypeDescription;
   }
 
+  public void addAsset(FacilityAssetModel newAsset) {
+    this.assets.add(newAsset);
+  }
+
   public boolean isActive() {
       return isActive;
   }

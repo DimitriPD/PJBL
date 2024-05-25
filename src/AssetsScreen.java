@@ -2,18 +2,24 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import Controller.AssetController;
+import Model.AssetModel;
 import Model.FacilityAssetModel;
 import Model.FacilityModel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class AssetsScreen extends JFrame {
 
     private FacilityModel selectedFacility;
     private JTable assetTable;
     private DefaultTableModel assetTableModel;
+    private JComboBox<String> assetComboBox;
+    private ArrayList<AssetModel> assets;
 
     public AssetsScreen(FacilityModel selectedFacility) {
 
@@ -43,6 +49,10 @@ public class AssetsScreen extends JFrame {
         header.setBackground(Color.decode("#610127"));
         header.setForeground(Color.WHITE);
 
+        // Combobox para o campo "Ativo"
+        assetComboBox = new JComboBox<>();
+        assetComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
+
         // Botões
         JButton addAssetButton = new JButton("Adicionar Ativo");
         addAssetButton.setBackground(Color.decode("#31458E"));
@@ -57,10 +67,13 @@ public class AssetsScreen extends JFrame {
         addAssetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /* 
-                 Lógica para adicionar um novo ativo
-                 Será necessário buscar todos os ativos, filtrar os que ainda não estão no selectedFacility e inserir estes numa combox para seleção
-                 */
+
+                if (assetComboBox.getSelectedItem() == null) {
+                    JOptionPane.showMessageDialog(null, "Todos os ativos já foram incluidos ao Espaço.");
+                }
+                else {
+                    showAssetDialog();
+                }
             }
         });
 
@@ -92,6 +105,7 @@ public class AssetsScreen extends JFrame {
                     FacilityAssetModel selectedAsset = selectedFacility.getAssets().get(selectedRow);
                     // Abrir diálogo de edição de ativo
                     deleteAssetDialog(selectedAsset);
+                    updateAssetTable();
                 } 
                 else if (assetTable.getRowCount() == 0) {
                     JOptionPane.showMessageDialog(null, "Não há ativos para excluir.");
@@ -122,6 +136,76 @@ public class AssetsScreen extends JFrame {
                     asset.getAssetDescription(),
                     asset.getQuantity()
             });
+        }
+    }
+
+    private void showAssetDialog() {
+        
+        assetComboBox.removeAllItems();
+        JTextField quantityField = new JTextField(String.valueOf(0));
+        boolean addAsset = true;
+        try {
+            assets = (ArrayList<AssetModel>) AssetController.getAll();
+            ArrayList<AssetModel> allAssets = (ArrayList<AssetModel>) AssetController.getAll();
+            ArrayList<FacilityAssetModel> existingAssets = (ArrayList<FacilityAssetModel>) selectedFacility.getAssets();
+
+            for (AssetModel assetFromAll : allAssets) {
+                for (AssetModel asset : existingAssets) {
+                    if (asset.getAssetId().equals(assetFromAll.getAssetId())) {
+                        addAsset = false;
+                        break;
+                    } else {
+                        addAsset = true;
+                    }
+                }
+                if (addAsset) {
+                    assetComboBox.addItem(assetFromAll.getAssetDescription());
+                } 
+            }
+            
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.setBackground(Color.WHITE);
+        panel.add(new JLabel("Ativos:"));
+        panel.add(assetComboBox);
+        panel.add(new JLabel("Quantidade:"));
+        panel.add(quantityField);        
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            int result = JOptionPane.showConfirmDialog(null, panel, "Editar Ativo", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result == JOptionPane.OK_OPTION) {
+                try {
+                    String assetDescription = (String) assetComboBox.getSelectedItem();
+                    
+                    String assetId = "";
+                    for (AssetModel asset : assets) {
+                        if (asset.getAssetDescription().equals(assetDescription)) {
+                            assetId = asset.getAssetId();
+                            break;
+                        }
+                    }
+                    // Obter a quantidade digitada pelo usuário
+                    int quantity = Integer.parseInt(quantityField.getText());
+                    // Validar se o valor está dentro do intervalo permitido
+                    if (quantity < 1 || quantity > 2000) {
+                        JOptionPane.showMessageDialog(null, "A quantidade deve ser um número positivo entre 1 e 2000.");
+                    } else {
+                        FacilityAssetModel newAsset = new FacilityAssetModel(selectedFacility.getFacilityId(), assetId, quantity, assetDescription);
+                        selectedFacility.addAsset(newAsset);
+                        updateAssetTable();
+                        isValidInput = true; // Sair do loop se a entrada for válida
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "A quantidade deve ser um número válido.");
+                }
+            } else {
+                // Se o usuário cancelar, sair do loop
+                break;
+            }
         }
     }
 
