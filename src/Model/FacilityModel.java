@@ -45,6 +45,10 @@ public class FacilityModel {
     this.assets = _facilityAssets;
   }
 
+  public void addAsset(FacilityAssetModel newAsset) {
+    this.assets.add(newAsset);
+  }
+
   public List<FacilityAssetModel> getAssets() {
     return this.assets;
   }

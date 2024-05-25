@@ -118,7 +118,7 @@ public class FacilityDAO {
         String sql = "INSERT INTO tbFacilityAssets ( " + //
                         "facilityId, " + //
                         "assetId,  " + //
-                        "quantity,  " + //
+                        "quantity)  " + //
                      " VALUES (?, ?, ?);";
         ArrayList<Object> bindParams = new ArrayList<>();
 		bindParams.add(asset.getFacilityId());
