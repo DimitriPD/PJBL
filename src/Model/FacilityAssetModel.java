@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.UUID;
+
 public class FacilityAssetModel extends AssetModel {
     private String facilityId;
     private int quantity;
@@ -19,14 +21,6 @@ public class FacilityAssetModel extends AssetModel {
         this.facilityId = facilityId;
     }
 
-    public String getAssetId() {
-        return this.assetId;
-    }
-
-    public void setAssetId(String assetId) {
-        this.assetId = assetId;
-    }
-
     public int getQuantity() {
         return quantity;
     }
@@ -35,11 +29,12 @@ public class FacilityAssetModel extends AssetModel {
         this.quantity = quantity;
     }
 
-    public String getAssetDescription() {
-        return assetDescription;
-    }
-
-    public void setAssetDescription(String assetDescription) {
-        this.assetDescription = assetDescription;
+    @Override
+    public void setAssetId(String assetId) {
+        if (assetId == null) {
+            this.assetId = UUID.randomUUID().toString();
+        } else {
+            this.assetId = assetId;
+        }
     }
 }

@@ -7,7 +7,6 @@ import Model.FacilityModel;
 import Model.FacilityTypeModel;
 import Model.FacilityAssetModel;
 
-
 public class FacilityController {
     
     public static List<FacilityModel> getAll() throws SQLException {

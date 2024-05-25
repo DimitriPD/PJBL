@@ -1,7 +1,5 @@
 package Model;
 
-import java.util.*;
-
 public class AssetModel {
     protected String assetId;
     protected String assetDescription;
@@ -16,11 +14,7 @@ public class AssetModel {
     }
 
     public void setAssetId(String assetId) {
-        if (assetId == null) {
-            this.assetId = UUID.randomUUID().toString();
-        } else {
-            this.assetId = assetId;
-        }
+        this.assetId = assetId;
     }
 
     public String getAssetDescription() {
