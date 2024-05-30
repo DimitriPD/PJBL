@@ -20,9 +20,7 @@ public class FacilityController {
         for (FacilityModel facility : facilities) {
             List<FacilityAssetModel> facilityAssets = FacilityDAO.getAllFacilityAssets(facility.getFacilityId());
             
-            if (facilityAssets != null) {
-                facility.setAssets(facilityAssets);
-            }
+            facility.setAssets(facilityAssets);
         }
         return facilities;
     }
@@ -38,9 +36,7 @@ public class FacilityController {
         if (getAssets) {
             List<FacilityAssetModel> facilityAssets = FacilityDAO.getAllFacilityAssets(id);
             
-            if (facilityAssets != null) {
-                facility.setAssets(facilityAssets);
-            }
+            facility.setAssets(facilityAssets);
         }
         return facility;
     }
@@ -73,22 +69,25 @@ public class FacilityController {
         List<FacilityAssetModel> updatedAssets = facilityUpdated.getAssets();
         List<FacilityAssetModel> existingAssets = facility.getAssets();
         
-        for (FacilityAssetModel asset : updatedAssets) {
-            FacilityAssetModel existingAsset = existingAssets.stream()
-                    .filter(assets -> assets.getAssetId().equals(asset.getAssetId()))
-                    .findFirst()
-                    .orElse(null);
-            
-            if (existingAsset != null) {
-                FacilityDAO.updateFacilityAsset(asset);
-            } else {
-                FacilityDAO.createFacilityAsset(asset);
+        if (updatedAssets != null) {
+            for (FacilityAssetModel asset : updatedAssets) {
+                FacilityAssetModel existingAsset = existingAssets.stream()
+                        .filter(assets -> assets.getAssetId().equals(asset.getAssetId()))
+                        .findFirst()
+                        .orElse(null);
+                
+                if (existingAsset != null) {
+                    FacilityDAO.updateFacilityAsset(asset);
+                } else {
+                    FacilityDAO.createFacilityAsset(asset);
+                }
             }
-        }
-        
-        for (FacilityAssetModel originalAsset : existingAssets) {
-            if (!updatedAssets.stream().anyMatch(a -> a.getAssetId().equals(originalAsset.getAssetId()))) {
-                FacilityDAO.deleteFacilityAsset(originalAsset.getFacilityId(), originalAsset.getAssetId());
+            
+            for (FacilityAssetModel originalAsset : existingAssets) {
+    
+                if (!updatedAssets.stream().anyMatch(a -> a.getAssetId().equals(originalAsset.getAssetId()))) {
+                    FacilityDAO.deleteFacilityAsset(originalAsset.getFacilityId(), originalAsset.getAssetId());
+                }
             }
         }
     }

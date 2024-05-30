@@ -78,7 +78,10 @@ public class FacilityModel {
   }
 
   public Integer getCapacity() {
-      return capacity;
+    if (this.capacity != null) {
+      return this.capacity;
+    }
+    return 0;
   }
 
   public void setCapacity(Integer _capacity) {

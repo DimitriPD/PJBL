@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import Controller.AssetController;
+import Exception.AssetDataAccessException;
 import Model.AssetModel;
 import Model.FacilityAssetModel;
 import Model.FacilityModel;
@@ -68,12 +69,7 @@ public class AssetsScreen extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (assetComboBox.getSelectedItem() == null) {
-                    JOptionPane.showMessageDialog(null, "Todos os ativos já foram incluidos ao Espaço.");
-                }
-                else {
-                    showAssetDialog();
-                }
+                showAssetDialog();
             }
         });
 
@@ -163,48 +159,53 @@ public class AssetsScreen extends JFrame {
                 } 
             }
             
-        } catch (SQLException e1) {
+        } catch (SQLException | AssetDataAccessException e1) {
             e1.printStackTrace();
         }
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
-        panel.setBackground(Color.WHITE);
-        panel.add(new JLabel("Ativos:"));
-        panel.add(assetComboBox);
-        panel.add(new JLabel("Quantidade:"));
-        panel.add(quantityField);        
-        boolean isValidInput = false;
-
-        while (!isValidInput) {
-            int result = JOptionPane.showConfirmDialog(null, panel, "Editar Ativo", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            if (result == JOptionPane.OK_OPTION) {
-                try {
-                    String assetDescription = (String) assetComboBox.getSelectedItem();
-                    
-                    String assetId = "";
-                    for (AssetModel asset : assets) {
-                        if (asset.getAssetDescription().equals(assetDescription)) {
-                            assetId = asset.getAssetId();
-                            break;
+        if (assetComboBox.getItemCount() == 0) {
+            JOptionPane.showMessageDialog(null, "Todos os ativos já foram adicionados ao espaço.");
+        }
+        else {
+            JPanel panel = new JPanel(new GridLayout(0, 1));
+            panel.setBackground(Color.WHITE);
+            panel.add(new JLabel("Ativos:"));
+            panel.add(assetComboBox);
+            panel.add(new JLabel("Quantidade:"));
+            panel.add(quantityField);        
+            boolean isValidInput = false;
+    
+            while (!isValidInput) {
+                int result = JOptionPane.showConfirmDialog(null, panel, "Editar Ativo", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    try {
+                        String assetDescription = (String) assetComboBox.getSelectedItem();
+                        
+                        String assetId = "";
+                        for (AssetModel asset : assets) {
+                            if (asset.getAssetDescription().equals(assetDescription)) {
+                                assetId = asset.getAssetId();
+                                break;
+                            }
                         }
+                        // Obter a quantidade digitada pelo usuário
+                        int quantity = Integer.parseInt(quantityField.getText());
+                        // Validar se o valor está dentro do intervalo permitido
+                        if (quantity < 1 || quantity > 2000) {
+                            JOptionPane.showMessageDialog(null, "A quantidade deve ser um número positivo entre 1 e 2000.");
+                        } else {
+                            FacilityAssetModel newAsset = new FacilityAssetModel(selectedFacility.getFacilityId(), assetId, quantity, assetDescription);
+                            selectedFacility.addAsset(newAsset);
+                            updateAssetTable();
+                            isValidInput = true; // Sair do loop se a entrada for válida
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "A quantidade deve ser um número válido.");
                     }
-                    // Obter a quantidade digitada pelo usuário
-                    int quantity = Integer.parseInt(quantityField.getText());
-                    // Validar se o valor está dentro do intervalo permitido
-                    if (quantity < 1 || quantity > 2000) {
-                        JOptionPane.showMessageDialog(null, "A quantidade deve ser um número positivo entre 1 e 2000.");
-                    } else {
-                        FacilityAssetModel newAsset = new FacilityAssetModel(selectedFacility.getFacilityId(), assetId, quantity, assetDescription);
-                        selectedFacility.addAsset(newAsset);
-                        updateAssetTable();
-                        isValidInput = true; // Sair do loop se a entrada for válida
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "A quantidade deve ser um número válido.");
+                } else {
+                    // Se o usuário cancelar, sair do loop
+                    break;
                 }
-            } else {
-                // Se o usuário cancelar, sair do loop
-                break;
             }
         }
     }

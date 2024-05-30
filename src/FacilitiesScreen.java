@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import Controller.FacilityController;
+import Model.FacilityAssetModel;
 import Model.FacilityModel;
 import Model.FacilityTypeModel;
 
@@ -90,8 +91,8 @@ public class FacilitiesScreen extends JFrame {
                     FacilityModel updatedFacility = showFacilityDialog(selectedFacility);
                     if (updatedFacility != null) {
                         facilityList.set(selectedRow, updatedFacility);
-                        updateFacilityTable();
                     }
+                    updateFacilityTable();
                 } else {
                     JOptionPane.showMessageDialog(null, "Selecione um espaço para edição.");
                 }
@@ -105,19 +106,25 @@ public class FacilitiesScreen extends JFrame {
                 if (selectedRow >= 0) {
                     selectedFacility = facilityList.get(selectedRow);
                     
-                    // Desabilitando a tela anterior
-                    setEnabled(false);
-                    
-                    AssetsScreen assetsScreen = new AssetsScreen(selectedFacility);
-                    assetsScreen.addWindowListener(new WindowAdapter() {
-                        @Override
-                        public void windowClosed(WindowEvent e) {
-                            // Habilitando a tela anterior quando a nova tela for fechada
-                            setEnabled(true);
-                            updateTheHoleFacility(selectedFacility);
-                        }
-                    });
-                    assetsScreen.setVisible(true);
+                    if (!selectedFacility.isActive()) {
+                        JOptionPane.showMessageDialog(null, "Não é possível gerenciar ativos de um espaço desativado.");
+                    }
+                    else {
+                        // Desabilitando a tela anterior
+                        setEnabled(false);
+                        
+                        AssetsScreen assetsScreen = new AssetsScreen(selectedFacility);
+                        assetsScreen.addWindowListener(new WindowAdapter() {
+                            @Override
+                            public void windowClosed(WindowEvent e) {
+                                // Habilitando a tela anterior quando a nova tela for fechada
+                                setEnabled(true);
+                                updateTheHoleFacility(selectedFacility);
+                            }
+                        });
+                        assetsScreen.setVisible(true);
+                    }
+
                 } else {
                     JOptionPane.showMessageDialog(null, "Selecione um espaço para gerenciar ativos.");
                 }
@@ -153,7 +160,7 @@ public class FacilitiesScreen extends JFrame {
                 typeComboBox.addItem(type.getFacilityTypeDescription());
             }
 
-            // Preenche com o valor do ativo caso tenha
+
             if (facility != null) {
                 for (int i = 0; i < typeComboBox.getItemCount(); i++) {
                     FacilityTypeModel type = types.get(i);
@@ -240,6 +247,7 @@ public class FacilitiesScreen extends JFrame {
         if (facility == null) {
             FacilityModel newFacility = new FacilityModel(facilityId, facilityTypeId, isActive, facilityName, capacity, note);
             newFacility.setFacilityTypeDescription(facilityTypeDescription);
+            newFacility.setAssets(new ArrayList<FacilityAssetModel>());
             FacilityController.create(newFacility);
             return newFacility;
         } else {
@@ -251,6 +259,9 @@ public class FacilitiesScreen extends JFrame {
             facility.setFacilityName(facilityName);
             if (capacity != 0) {
                 facility.setCapacity(capacity);
+            }
+            else {
+                facility.setCapacity(null);
             }
             facility.setNote(note);
 
